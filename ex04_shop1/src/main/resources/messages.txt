@@ -1,0 +1,2 @@
+# /resources/messages.txt
+typeMismatch.birthday=생년월일은 YYYY-MM-DD 형식으로 입력하세요.
