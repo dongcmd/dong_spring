@@ -23,7 +23,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 @ComponentScan(basePackages = {"controller", "logic", "service", "dao", "aop"})
 @EnableAspectJAutoProxy // AOP 사용을 위한 설정
 @EnableWebMvc // 기본 웹 처리를 위한 설정.
-public class MvcConfig implements WebMvcConfigurer {
+public class MvcConfig implements WebMvcConfigurer { // DispatcherServlet이 사용할 설정 클래스
 	@Bean
 	public HandlerMapping handlerMapping() { // url 처리
 		RequestMappingHandlerMapping hm = new RequestMappingHandlerMapping();
@@ -62,6 +62,7 @@ public class MvcConfig implements WebMvcConfigurer {
 		SimpleMappingExceptionResolver ser = new SimpleMappingExceptionResolver();
 		Properties pr = new Properties();
 		pr.put("exception.ShopException", "exception");
+		// exception.ShopException 예외 발생시 exception.jsp 페이지 이동
 		ser.setExceptionMappings(pr);
 		return ser;
 	}

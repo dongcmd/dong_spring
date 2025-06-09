@@ -1,5 +1,6 @@
 package dao;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,5 +26,48 @@ public class UserDao {
 		param.clear();
 		param.put("userid", userid);
 		return template.selectOne("dao.mapper.UserMapper.select", param);
+	}
+
+	public void update(User user) {
+		template.getMapper(cls).update(user);
+	}
+
+	public void delete(String userid) {
+		template.getMapper(cls).delete(userid);
+	}
+
+	public void chgpass(String userid, String chgpass) {
+		param.clear();
+		param.put("userid", userid);
+		param.put("chgpass", chgpass);
+		template.getMapper(cls).chgpass(param);
+	}
+
+	public String search(User user) {
+		String col = "userid";
+		if(user.getUserid() != null) col = "password";
+		param.clear();
+		param.put("col", col);
+		param.put("userid", user.getUserid());
+		param.put("email", user.getEmail());
+		param.put("phoneno", user.getPhoneno());
+		return template.getMapper(cls).search(param);
+	}
+
+	public String resetPw(User user) {
+		final String CHAR_POOL = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	    final SecureRandom random = new SecureRandom();
+	    String newPw = "";
+	    for(int i = 0; i < 6; i++) {
+	    	int idx = random.nextInt(CHAR_POOL.length());
+	    	newPw += CHAR_POOL.charAt(idx);
+	    }
+		param.clear();
+		param.put("userid", user.getUserid());
+		param.put("newPw", newPw);
+		if(template.getMapper(cls).resetPw(param) == 1) {
+			return newPw;
+		}
+		return null;
 	}
 }

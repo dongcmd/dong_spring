@@ -25,11 +25,11 @@
 	<input type="submit" value="로그인">
 	<input type="button" value="회원가입" onclick="location.href='join'">
 	<input type="button" value="아이디찾기" onclick="win_open('idsearch')">
-	<input type="button" value="비번찾기" onclick="win_open('pwsearch')">
+	<input type="button" value="비번초기화" onclick="win_open('pwsearch')">
 	</td></tr></table></form:form>
 <script>
 	function win_open(page) {
-		var op = "width=500, height=350, left=50, top=150";
+		var op = "width=500, height=350, left=1050, top=250";
 		open(page, "", op);
 	}
 </script>
