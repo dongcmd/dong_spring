@@ -43,5 +43,8 @@ public interface UserMapper {
 	@Update("update useraccount set password=#{newPw} where userid=#{userid}")
 	Integer resetPw(Map<String, Object> param);
 
+	@Select("select * from useraccount")
+	List<User> list();
+
 
 }

@@ -24,9 +24,10 @@
 </tr></table>
 <div id="oinfo" class="info" style="display:none; width:100%;">
 <table><tr><th>주문번호</th><th>주문일자</th><th>주문금액</th></tr>
-	<c:forEach items="${salelist}" var="sale" varStatus="stat">
+	<c:forEach items="${saleList}" var="sale" varStatus="stat">
 	<tr><td align="center">
 				<a href="javascript:list_disp('saleLine${stat.index}')">${sale.saleid}</a></td>
+			<td align="center"><fmt:formatDate value="${sale.saledate}" pattern="yyyy-MM-dd" /></td>
 			<td align="right">
 				<fmt:formatNumber value="${sale.total}" pattern="###,###" />원</td></tr>
 	<tr id="saleLine${stat.index}" class="saleLine">
@@ -56,8 +57,9 @@
 	<a href="delete?userid=${user.userid}">[회원탈퇴]</a>&nbsp;
 </c:if>
 <c:if test="${loginUser.userid == 'admin'}">
-	<a href="../admin/list">[회원목록]</a>&nbsp;
+	<a href="../user/list">[회원목록]</a>&nbsp;
 </c:if>
+<a href="../item/list">상품목록</a>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>

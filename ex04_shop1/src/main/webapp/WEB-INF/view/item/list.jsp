@@ -9,6 +9,9 @@
 </head>
 <body>
 	<a href="create">상품등록</a>
+	<c:if test="${!empty loginUser}">
+		<a href="../user/mypage?userid=${loginUser.userid}" style="float:right">회원정보</a><br>
+	</c:if>
 	<a href="../cart/cartView" style="float:right">장바구니</a>
 	<table border="1">
 		<tr><th width="80">상품ID</th>

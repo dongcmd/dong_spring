@@ -10,12 +10,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import dao.ItemDao;
+import dao.SaleDao;
+import dao.SaleItemDao;
+import logic.Cart;
 import logic.Item;
+import logic.ItemSet;
+import logic.Sale;
+import logic.SaleItem;
+import logic.User;
 
 @Service
 public class ShopService {
 	@Autowired
 	private ItemDao itemDao;
+	@Autowired
+	private SaleDao saleDao;
+	@Autowired
+	private SaleItemDao saleItemDao;
+	
 	
 	public List<Item> itemList() {
 		return itemDao.list();
@@ -60,5 +72,34 @@ public class ShopService {
 
 	public void itemDelete(Integer id) {
 		itemDao.delete(id);
+	}
+	
+	public Sale checkend(User loginUser, Cart cart) {
+		int maxsaleid = saleDao.getMaxSaleId();
+		Sale sale = new Sale();
+		sale.setSaleid(maxsaleid+1);
+		sale.setUser(loginUser);
+		sale.setUserid(loginUser.getUserid());
+		saleDao.insert(sale);
+		int seq = 0;
+		for(ItemSet is : cart.getItemSetMap().values()) {
+			SaleItem saleItem = new SaleItem(sale.getSaleid(), ++seq, is);
+			sale.getItemList().add(saleItem);
+			saleItemDao.insert(saleItem);
+		}
+		return sale; // 주문정보, 고객정보, 주문상품 정보
+	}
+
+	public List<Sale> saleList(String userid) {
+		List<Sale> list = saleDao.list(userid);
+		for(Sale sale : list) {
+			List<SaleItem> saleItemList = saleItemDao.list(sale.getSaleid());
+			for(SaleItem si : saleItemList) {
+				Item item = itemDao.select(si.getItemid());
+				si.setItem(item);
+			}
+			sale.setItemList(saleItemList);
+		}
+		return list;
 	}
 }

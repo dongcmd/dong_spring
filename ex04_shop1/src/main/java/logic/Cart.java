@@ -11,17 +11,17 @@ import lombok.Getter;
 public class Cart {
 
 //	private List<ItemSet> itemSetList = new ArrayList<ItemSet>();
-	private Map<String, ItemSet> itemSetMap = new LinkedHashMap<String, ItemSet>();
-	// 상품명, ItemSet
+	private Map<Integer, ItemSet> itemSetMap = new LinkedHashMap<>();
+	// 상품번호, ItemSet
 	
 	public void push(ItemSet itemSet) {
 //		itemSetList.add(itemSet);
-		if(itemSetMap.get(itemSet.getItem().getName()) == null) {
-			itemSetMap.put(itemSet.getItem().getName(), itemSet);
+		if(itemSetMap.get(itemSet.getItem().getId()) == null) {
+			itemSetMap.put(itemSet.getItem().getId(), itemSet);
 		} else {
-			itemSetMap.get(itemSet.getItem().getName()).setQuantity(
-			  itemSetMap.get(itemSet.getItem().getName()).getQuantity()
-			   + itemSet.getQuantity()
+			itemSetMap.get(itemSet.getItem().getId())
+			.setQuantity(itemSetMap.get(itemSet.getItem().getId())
+				.getQuantity() + itemSet.getQuantity()
 			);
 		}
 	}

@@ -18,7 +18,7 @@
 				<td><fmt:formatNumber value="${entry.value.item.price}" pattern="###,###" /></td>
 				<td><fmt:formatNumber value="${entry.value.quantity}" pattern="###,###" /></td>
 				<td><fmt:formatNumber value="${entry.value.quantity * entry.value.item.price}" pattern="###,###" />
-				<a href="cartDelete?index=${stat.index}"> X </a></td></tr>
+				<a href="cartDelete?id=${entry.value.item.id}"> X </a></td></tr>
 	</c:forEach>
 	<tr><td colspan="4" align="right">총 구입 금액 :
 		<fmt:formatNumber value="${cart.total}" pattern="###,###" />원</td></tr>

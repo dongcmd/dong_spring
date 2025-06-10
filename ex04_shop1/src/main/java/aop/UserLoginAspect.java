@@ -5,8 +5,9 @@ import javax.servlet.http.HttpSession;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
-
+import service.ShopService;
 import exception.ShopException;
 import logic.User;
 
@@ -18,13 +19,24 @@ import logic.User;
 @Component
 @Aspect
 public class UserLoginAspect {
+
+    private final ShopService shopService;
+
+    UserLoginAspect(ShopService shopService) {
+        this.shopService = shopService;
+    }
+	
+	public ShopException loginCheckMethod() {
+		return new ShopException("로그인하세요", "login");
+	}
+	
 	@Around(
 "execution(* controller.User*.idCheck*(..)) && args(.., userid, session)")
 	public Object userIdCheck(ProceedingJoinPoint joinPoint, String userid,
 			HttpSession session) throws Throwable {
 		User loginUser = (User)session.getAttribute("loginUser");
 		if(loginUser == null || !(loginUser instanceof User)) { // 로그아웃 상태
-			throw new ShopException("[idCheck]로그인 필요", "login");
+			throw loginCheckMethod();
 		}
 		if(!loginUser.getUserid().equals("admin")
 			&& !loginUser.getUserid().equals(userid)) {
@@ -40,9 +52,21 @@ public class UserLoginAspect {
 			HttpSession session) throws Throwable {
 		User loginUser = (User)session.getAttribute("loginUser");
 		if(loginUser == null || !(loginUser instanceof User)) { // 로그아웃 상태
-			throw new ShopException("[loginCheck]로그인 필요", "login");
+			throw loginCheckMethod();
 		}
 		return joinPoint.proceed();
+	}
+	
+	@Before("execution(* controller.*.adminCheck*(..)) && args(.., session)")
+	public void adminCheck(HttpSession session) throws Throwable {
+		User loginUser = (User)session.getAttribute("loginUser");
+		if(loginUser == null || !(loginUser instanceof User)) {
+			throw loginCheckMethod();
+		}
+		if(!loginUser.getUserid().equals("admin")) {
+			throw new ShopException("관리자만 가능",
+				"../user/mypage?userid=" + loginUser.getUserid());
+		}
 	}
 	
 }

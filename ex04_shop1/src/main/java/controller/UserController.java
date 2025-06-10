@@ -1,6 +1,7 @@
 package controller;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -15,14 +16,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import exception.ShopException;
+import logic.Sale;
 import logic.User;
+import service.ShopService;
 import service.UserService;
 
 @Controller
 @RequestMapping("user")
 public class UserController {
+	
 	@Autowired
 	private UserService service;
+	@Autowired
+	private ShopService shopService;
 	
 	@GetMapping("*")
 	public ModelAndView form() {
@@ -84,20 +90,22 @@ public class UserController {
 			bresult.reject("error.login.password");
 			return mav;
 		}
+		/*
+		 * userid 맞는 User를 db에서 조회
+		 * 비번 검증
+		 * 	일치 : session.setAttribute(login, dbuser) 로긴 정보
+		 * 	불일치 : 비번확인하셈 . 출력(error.login.password)
+		 * mypage 이동
+		 */
 	}
-	/*
-	 * userid 맞는 User를 db에서 조회
-	 * 비번 검증
-	 * 	일치 : session.setAttribute(login, dbuser) 로긴 정보
-	 * 	불일치 : 비번확인하셈 . 출력(error.login.password)
-	 * mypage 이동 
-	 */
 	
 	@RequestMapping("mypage")
 	public ModelAndView idCheckMypage(String userid, HttpSession session) {
 		ModelAndView mav = new ModelAndView();
 		User user = service.selectUser(userid);
+		List<Sale> saleList = shopService.saleList(userid);
 		mav.addObject("user", user);
+		mav.addObject("saleList", saleList);
 		return mav;
 	}
 	
@@ -172,22 +180,22 @@ public class UserController {
 		}
 		mav.setViewName(url);
 		return mav;
+		/*
+		 * UserLoginaApect.userIdCheck() 메서드 실행 설정
+		 * 탈퇴 검증
+		 * 1. 관리자의 경우 탈퇴 불가
+		 * 2. 비밀번호 검증 => 로그인된 비번과 비교
+		 * 		관리자가 타인 탈퇴 : 관리자 비번 검증
+		 * 		본인 탈퇴시 : 본인 비번 검증
+		 * 3-1. 비번 불일치
+		 * 		메세지 출력 후 delete 페이지로 이동
+		 * 3-2. 비번 일치
+		 * 		db에서 사용자 정보 삭제
+		 * 3-2-1. 본인 탈퇴시 로그아웃 후 로긴페이지
+		 * 3-2-2. 타인 탈퇴시 user/list 페이지 이동
+		 * 
+		 */
 	}
-	/*
-	 * UserLoginaApect.userIdCheck() 메서드 실행 설정
-	 * 탈퇴 검증
-	 * 1. 관리자의 경우 탈퇴 불가
-	 * 2. 비밀번호 검증 => 로그인된 비번과 비교
-	 * 		관리자가 타인 탈퇴 : 관리자 비번 검증
-	 * 		본인 탈퇴시 : 본인 비번 검증
-	 * 3-1. 비번 불일치
-	 * 		메세지 출력 후 delete 페이지로 이동
-	 * 3-2. 비번 일치
-	 * 		db에서 사용자 정보 삭제
-	 * 3-2-1. 본인 탈퇴시 로그아웃 후 로긴페이지
-	 * 3-2-2. 타인 탈퇴시 user/list 페이지 이동
-	 * 
-	 */
 	
 	@PostMapping("password")
 	public String loginCheckPassword(String password, String chgpass,
@@ -204,18 +212,18 @@ public class UserController {
 		} else {
 			throw new ShopException("입력한 비밀번호가 다릅니다.", "password");
 		}
+		/* 
+		 * 본인의 비번만 변경 가능.
+		 * 1. 로그인 검증 => AOP 클래스
+		 * 	UserLoginAspect.loginCheck()
+		 * 	 pointcut : UserController.loginCheck*(..)인 메서드이고,
+		 * 					마지막 변수가 HttpSession인 메서드
+		 *   advice : Around
+		 * 2. db 비밀번호와 입력한 현재 비번과 일치 검증
+		 * 3-1. 일치 :  db를 수정. session 정보 변경. mypage 이동
+		 * 3-2. 불일치 : 오류 메세지 출력 후 password 페이지 이동(새로고침)  
+		 */
 	}
-	/* 
-	 * 본인의 비번만 변경 가능.
-	 * 1. 로그인 검증 => AOP 클래스
-	 * 	UserLoginAspect.loginCheck()
-	 * 	 pointcut : UserController.loginCheck*(..)인 메서드이고,
-	 * 					마지막 변수가 HttpSession인 메서드
-	 *   advice : Around
-	 * 2. db 비밀번호와 입력한 현재 비번과 일치 검증
-	 * 3-1. 일치 :  db를 수정. session 정보 변경. mypage 이동
-	 * 3-2. 불일치 : 오류 메세지 출력 후 password 페이지 이동(새로고침)  
-	 */
 	
 	@PostMapping("{url}search")
 	public ModelAndView search(User user, BindingResult bresult
@@ -254,12 +262,21 @@ public class UserController {
 		if(result == null) {
 			bresult.reject(code);
 			return mav;
-		} else if(url.equals("pw")) {
+		} else if(url.equals("pw")) { // 비밀번호 초기화
 			result = service.resetPw(user);
 		}
 		mav.addObject("result", result);
 		mav.addObject("title", title);
 		mav.setViewName("search");
+		return mav;
+	}
+	
+	@RequestMapping("list")
+	public ModelAndView adminCheckUserList(HttpSession session) {
+		ModelAndView mav = new ModelAndView("user/list");
+		List<User> list = service.list();
+		
+		mav.addObject("list", list);
 		return mav;
 	}
 }

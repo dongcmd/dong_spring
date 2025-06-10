@@ -1,11 +1,14 @@
 package service;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import dao.UserDao;
+import logic.Sale;
 import logic.User;
 
 @Service
@@ -40,4 +43,9 @@ public class UserService {
 	public String resetPw(User user) {
 		return userDao.resetPw(user);
 	}
+
+	public List<User> list() {
+		return userDao.list();
+	}
+
 }

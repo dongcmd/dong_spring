@@ -2,6 +2,7 @@ package dao;
 
 import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
@@ -57,17 +58,21 @@ public class UserDao {
 	public String resetPw(User user) {
 		final String CHAR_POOL = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	    final SecureRandom random = new SecureRandom();
-	    String newPw = "";
+	    StringBuilder newPw = new StringBuilder();
 	    for(int i = 0; i < 6; i++) {
 	    	int idx = random.nextInt(CHAR_POOL.length());
-	    	newPw += CHAR_POOL.charAt(idx);
+	    	newPw.append(CHAR_POOL.charAt(idx));
 	    }
 		param.clear();
 		param.put("userid", user.getUserid());
-		param.put("newPw", newPw);
+		param.put("newPw", newPw.toString());
 		if(template.getMapper(cls).resetPw(param) == 1) {
-			return newPw;
+			return newPw.toString();
 		}
 		return null;
+	}
+
+	public List<User> list() {
+		return template.getMapper(cls).list();
 	}
 }
