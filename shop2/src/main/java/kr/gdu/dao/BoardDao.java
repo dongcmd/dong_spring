@@ -53,5 +53,11 @@ public class BoardDao {
 	public void delete(int num) {
 		template.getMapper(cls).delete(num);
 	}
+	public void grpStepAdd(Board board) {
+		param.clear();
+		param.put("grp", board.getGrp());
+		param.put("grpstep", board.getGrpstep());
+		template.getMapper(cls).grpStepAdd(param);
+	}
 	
 }

@@ -18,7 +18,8 @@
 				<font color="red"><form:errors path="pass" /></font></td></tr>
 		<tr><td>제목</td><td><form:input path="title" />
 				<font color="red"><form:errors path="title" /></font></td></tr>
-		<tr><td>내용</td><td><form:textarea path="content" rows="15" cols="80"/>
+		<tr><td>내용</td><td><form:textarea path="content" rows="15" cols="80"
+		id="summernote" />
 				<font color="red"><form:errors path="content" /></font></td></tr>
 		<tr><td>첨부파일</td><td><c:if test="${!empty board.fileurl}">
 				<div id="file_desc">
@@ -33,6 +34,36 @@
 	function file_delete() {
 		document.f.fileurl.value = "";
 		file_desc.style.display = "none";	
+	}
+</script>
+<script>
+	$(function() {
+		  $('#summernote').summernote({
+			  height : 300,
+			  callbacks : {
+					onImageUpload : function(images) {
+						for(let i = 0; i < images.length; i++) {
+							sendFile(images[i])
+						}
+					}
+			  }
+		  })
+	});
+	function sendFile(file) {
+		let data = new FormData(); // 데이터 컨테이너 생성
+		data.append("image", file); // 컨테이너에 이미지 객체 추가
+		$.ajax({ // ajax를 이용하여 파일 업로드
+			url : "/ajax/uploadImage", // 서버 요청 url
+			type : "post",						// post 방식
+			data : data,							// 전송 데이터
+			processData : false,			// 문자열 전송 아님.
+			contentType : false,			// 컨텐트 타입 자동 설정 안함. 파일 업로드시 사용
+			success : function(src) { // 서버 응답 정상처리
+				$("#summernote").summernote("insertImage", src)
+			}, error : function(e) { // 서버 응답 오류
+				alert("이미지 업로드 실패 : " + e.status)
+			}
+		})
 	}
 </script>
 </body>

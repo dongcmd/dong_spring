@@ -7,7 +7,7 @@
 --%>    
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <c:set var="path" value="${pageContext.request.contextPath}" />
-    
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,11 +17,16 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<script type="text/javascript" src= 
-"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js">
-</script>
-<script type="text/javascript" 
-   src="http://cdn.ckeditor.com/4.5.7/standard/ckeditor.js"></script>
+<script src="http://cdn.ckeditor.com/4.5.7/standard/ckeditor.js"></script>
+<%-- summernote 관련 설정 jquery, bootstrap 기능 사용 --%>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote.min.js"></script>
+
 <style>
 html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 </style>
@@ -97,18 +102,6 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <header class="w3-container" style="padding-top:22px">
     <h5><b><i class="fa fa-dashboard"></i>게시판현황</b></h5>
   </header>
-  <div class="w3-row-padding w3-margin-bottom">
-    <div class="w3-half">
-      <div class="w3-container w3-padding-16 w3-center">
-         <input type="radio" name="pie" onchange="piegraph(2)"
-          checked="checked">자유게시판 &nbsp;&nbsp;
-         <input type="radio" name="pie" onchange="piegraph(3)">QNA &nbsp;&nbsp;
-         <div id="piecontainer" style="width:100%; border:1px solid #ffffff">
-            <canvas id="canvas1" style="width:100%"></canvas>
-         </div>
-      </div>
-    </div>
-  </div>
 
   <div class="w3-panel">
   <sitemesh:write property="body" />

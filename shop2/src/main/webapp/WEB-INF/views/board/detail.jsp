@@ -12,6 +12,8 @@
 		Controller, BoardService, BoardDao, BoardMapper 구현
 --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>게시물 상세보기</title>
 <style>
@@ -31,9 +33,53 @@
 			<a href="file/${board.fileurl}">${board.fileurl}</a>
 		</c:if></td></tr>
 	<tr><td colspan="2">
-		<a href="reply?num=${board.num}">[답변]</a>
+		<a href="reply?num=${board.num}&boardid=${board.boardid}">[답변]</a>
 		<a href="update?num=${board.num}&boardid=${board.boardid}">[수정]</a>
 		<a href="delete?num=${board.num}&boardid=${board.boardid}">[삭제]</a>
 		<a href="list?boardid=${board.boardid}">[게시물 목록]</a>
 		</td></tr></table>
+		<%-- 댓글 등록, 조회, 삭제 --%>
+		<%-- (url)#comment 요청
+					#comment : id 속성값이 comment 위치를 보여줌 --%>
+		<span id="comment"></span>
+		<form:form modelAttribute="comment" action="comment"
+				 method="post" name="commForm">
+			<form:hidden path="num" />
+			<div class="w3-row">
+				<div class="w3-col s2 w3-center">
+					<p><form:input path="writer" class="w3-input w3-border"
+							 placeholder="작성자" />
+						<font color="red"><form:errors path="writer" /></font></p>
+				</div>
+				<div class="w3-col s2 w3-center">
+					<p><form:password path="pass" class="w3-input w3-boreder"
+							 placeholder="비밀번호" />
+						<font color="red"><form:errors path="pass" /></font></p>
+				</div>
+				<div class="w3-col s7 w3-center">
+					<p><form:input path="content" class="w3-input w3-border"
+							 placeholder="댓글내용" />
+						<font color="red"><form:errors path="content" /></font></p>
+				</div>
+				<div class="w3-col s1 w3-center">
+					<p><button type="submit" class="w3-btn w3-border">댓글등록</button></p>
+				</div>
+			</div>
+		</form:form>
+		<div class="w3-container">
+		<table class="w3-table-all">
+			<c:forEach var="c" items="${commlist}" varStatus="stat">
+				<tr><td>${c.seq}</td><td>${c.writer}</td>
+					<td>${c.content}</td>
+					<td><fmt:formatDate value="${c.regdate}" pattern="yyyy-MM-dd HH:mm:ss" /></td>
+					<td class="w3-right">
+						<form action="commdel" method="post" name="commdel${stat.index}">
+						<input type="hidden" name="num" value="${c.num}">
+						<input type="hidden" name="seq" value="${c.seq}">
+						<input type="password" name="pass" placeholder="비밀번호">
+						<a class="w3-btn w3-border w3-blue"
+							href="javascript:document.commdel${stat.index}.submit()">삭제</a>
+						</form></td></tr></c:forEach>
+		</table>
+		</div>
 </body></html>

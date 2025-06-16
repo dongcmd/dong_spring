@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import kr.gdu.logic.Board;
+
 @Mapper
 public interface BoardMapper {
     String select = "select num,writer,pass,title,content,file1 fileurl,"
@@ -51,5 +52,8 @@ public interface BoardMapper {
 
     @Delete("delete from board where num=#{value}")
 	void delete(int num);
-	
+
+    @Update("update board set grpstep=grpstep + 1"
+    		+ " where grp=#{grp} and grpstep>#{grpstep}")
+	void grpStepAdd(Map<String, Object> param);
 }

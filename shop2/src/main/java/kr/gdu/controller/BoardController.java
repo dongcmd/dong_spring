@@ -16,21 +16,26 @@ import org.springframework.web.servlet.ModelAndView;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import kr.gdu.Shop2Application;
 import kr.gdu.config.MvcConfig;
 import kr.gdu.exception.ShopException;
 import kr.gdu.logic.Board;
+import kr.gdu.logic.Comment;
 import kr.gdu.service.BoardService;
 
 @Controller
 @RequestMapping("board")
 public class BoardController {
 
+    private final Shop2Application shop2Application;
+
     private final MvcConfig mvcConfig;
 	@Autowired
 	private BoardService service;
 
-    BoardController(MvcConfig mvcConfig) {
+    BoardController(MvcConfig mvcConfig, Shop2Application shop2Application) {
         this.mvcConfig = mvcConfig;
+        this.shop2Application = shop2Application;
     }
 	
 	@GetMapping("*")
@@ -113,7 +118,14 @@ public class BoardController {
 		} else if(boardid.equals("3")) {
 			mav.addObject("boardName", "QNA");
 		}
+		
+		// 댓글
+		List<Comment> commlist = service.commentlist(num);
+		Comment comm = new Comment();
+		comm.setNum(num);
 		mav.addObject("board", board);
+		mav.addObject("commlist", commlist);
+		mav.addObject(comm);
 		return mav;
 	}
 	
@@ -170,8 +182,13 @@ public class BoardController {
 	}
 	
 	@PostMapping("delete")
-	public ModelAndView delete(@Valid Board board, BindingResult bresult) {
+	public ModelAndView delete(Board board, BindingResult bresult) {
 		ModelAndView mav = new ModelAndView();
+		if(board.getPass() == null || board.getPass().trim().equals("")) {
+			bresult.reject("error.input.password");
+			return mav;
+		}
+		
 		Board dbBoard = service.getBoard(board.getNum());
 		if(dbBoard.getPass().equals(board.getPass())) {
 			service.boardDelete(board.getNum());
@@ -180,5 +197,75 @@ public class BoardController {
 			bresult.rejectValue("pass", "error.delete");
 		}
 		return mav;
+	}
+	@PostMapping("reply")
+	public ModelAndView reply(@Valid Board board, BindingResult bresult) {
+		ModelAndView mav = new ModelAndView();
+		
+		// 유효성 검증
+		if(bresult.hasErrors()) {
+			return mav;
+		}
+		try {
+			service.boardReply(board);
+			mav.setViewName("redirect:list?boardid=" + board.getBoardid());
+		} catch(Exception e) {
+			e.printStackTrace();
+			String url = "reply?num=" + board.getNum() +
+					"&boardid=" + board.getBoardid();
+			throw new ShopException("답변등록시 오류 발생", url);
+		}
+		return mav;
+	}
+	/*
+	 * 1. 유효성 검사 - 파라미터 저장
+	 * 		-원글 : num, grp, grplevel, grpstep, boardid
+	 * 		-답글 : writer, pass, title, content
+	 * 2. db에 insert => service.boardReply()
+	 * 		원글의 grpstep 보다 큰 기존 등록된 답글의 grpstep 값 +1 로 수정
+	 * 		=> boardDao.grpstepAdd()
+	 * 
+	 * 		num : maxNum() +1
+	 * 		db에 insert => boardDao.insert()
+	 * 		grp : 원글과 동일
+	 * 		grplevel : 원글의 grplevel + 1
+	 * 		grpstep : 원글의 grpstep + 1
+	 * 3. 등록 성공 : list로 페이지 이동
+	 *    등록 실패 : "답변 등록시 오류 발생" reply 페이지 이동
+	 */
+	
+	@RequestMapping("comment") // 댓글등록
+	public ModelAndView comment(@Valid Comment comm, BindingResult bresult) {
+		ModelAndView mav = new ModelAndView("board/detail");
+		if(bresult.hasErrors()) {
+			return commdetail(comm);
+		}
+		
+		// comment 테이블의 기본값 : num, seq
+		int seq = service.commMaxSeq(comm.getNum());
+		comm.setSeq(++seq);
+		service.comminsert(comm);
+		mav.setViewName("redirect:detail?num=" + comm.getNum() + "#comment");
+		return mav;
+	}
+	
+	private ModelAndView commdetail(Comment comm) {
+		ModelAndView mav = detail(comm.getNum()); // 조회수증가. 수정 필요
+		// comm : @Valid 완료한 객체. 오류 정보 저장
+		mav.setViewName("board/detail");
+		mav.addObject(comm);
+		return mav;
+	}
+	
+	@RequestMapping("commdel")
+	public String commdel(Comment comm) {
+		Comment dbComm = service.commSelectOne(comm.getNum(), comm.getSeq());
+		if(comm.getPass().equals(dbComm.getPass())) {
+			service.commdel(comm.getNum(), comm.getSeq());
+		} else {
+			throw new ShopException("댓글 삭제 실패",
+					"detail?num=" + comm.getNum() + "#comment");
+		}
+		return "redirect:detail?num=" + comm.getNum() + "#comment";
 	}
 }

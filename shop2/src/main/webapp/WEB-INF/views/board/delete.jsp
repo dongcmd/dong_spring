@@ -20,6 +20,7 @@
 	var="error"><spring:message code="${error.code}" /></c:forEach>
 	</font></spring:hasBindErrors>
 <input type="hidden" name="num" value="${param.num}">
+<input type="hidden" name="boardid" value="${param.boardid}">
 <table class="w3-table-all">
     <caption>${boardName}글 삭제 화면</caption>
 	<tr><td>게시글비밀번호</td>
