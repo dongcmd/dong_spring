@@ -19,12 +19,16 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <script src="http://cdn.ckeditor.com/4.5.7/standard/ckeditor.js"></script>
 <%-- summernote 관련 설정 jquery, bootstrap 기능 사용 --%>
+<!-- Bootstrap 4 CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+<!-- Summernote CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+
+<!-- jQuery (하나만, slim 말고 full 버전) -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Bootstrap 4 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<!-- Summernote JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote.min.js"></script>
 
 <style>
@@ -52,7 +56,7 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
 <nav class="w3-sidebar w3-collapse w3-white w3-animate-left" style="z-index:3;width:300px;" id="mySidebar"><br>
   <div class="w3-container w3-row">
     <div class="w3-col s4">
-      <img src="${path}/image/logo.png" 
+      <img src="https://cdn.imweb.me/thumbnail/20250617/0b0d09c937624.png" 
          class="w3-circle w3-margin-right" style="width:100px">
     </div>
     <div class="w3-col s8 w3-bar">
@@ -90,6 +94,11 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
     <c:if test='${url == "board" && boardid=="3"}'>w3-blue</c:if>">
     <i class="fa fa-eye fa-fw"></i>&nbsp; QnA</a>
   </div><br><br>
+  <%-- 수출입 은행 환율 정보 표시 영역 --%>
+  <div style="width:100%;">
+	  <div id="exchange" style="width:70%; margin:6px;">
+	  </div>
+  </div>
 </nav>
 
 <!-- Overlay effect when opening sidebar on small screens -->
@@ -102,6 +111,23 @@ html,body,h1,h2,h3,h4,h5 {font-family: "Raleway", sans-serif}
   <header class="w3-container" style="padding-top:22px">
     <h5><b><i class="fa fa-dashboard"></i>게시판현황</b></h5>
   </header>
+	<div class="w3-row-padding w3-margin-bottom">
+		<div class="w3-half">
+			<div class="w3-container w3-padding-16 w3-center">
+				<input type="radio" name="pie" onchange="piegrach(2)" checked="checked">자유게시판
+				<input type="radio" name="pie" onchange="piegrach(3)">QNA
+				<div id="piecontainer" style="width:100%; border:1px solid #ffffff">
+				</div>
+			</div>
+		</div>
+		<div class="w3-half">
+			<div class="w3-container w3-padding-16 w3-center">
+				<input type="radio" name="barline" onchange="barlinegraph(2)" checked="checked">자유게시판
+				<input type="radio" name="barline" onchange="barlinegraph(3)">QNA
+				<div id="piecontainer" style="width:100%; border:1px solid #ffffff"></div>
+			</div>
+		</div>
+	</div>
 
   <div class="w3-panel">
   <sitemesh:write property="body" />
@@ -158,5 +184,141 @@ function w3_close() {
 </script>
 <script type="text/javascript" 
        src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+<script>
+		$(function() {
+			getSido1();
+			//exchangeRate(); // 환율정보 HTML 형식 리턴
+			exchangeRate2(); // 환율정보 Map형식(json)
+			piegraph(2); // 글쓴이별 게시글 건수를 파이그래프 출력
+		});
+		function getSido1() {
+			$.ajax({
+				url : "/ajax/select1",
+				success : function(data) { // ajaxC 성공시
+					console.log(data);
+					let arr = data.substring(data.indexOf('[') + 1,
+							data.indexOf(']')).split(",");
+					$.each(arr, function(i, item) {
+						$("select[name=si]").append(function() {
+							return "<option>" + item + "</option>";
+						});
+					});
+				}
+			});
+		}
+		
+		function getText(name) {
+			let city = $("select[name='si']").val();
+			let gu = $("select[name='gu']").val();
+			let disname;
+			let toptext="구군을 선택하세요";
+			let params="";
+			if(name == "si") {
+				params = "si=" + city.trim();
+				disname = "gu";
+			} else if(name == "gu") {
+				params = "si=" + city.trim() + "&gu=" + gu.trim();
+				disname = "dong";
+				toptext = "동리를 선택하세요";
+			} else { return; }
+			$.ajax({
+				url : "/ajax/select2",
+				type : "POST",
+				data : params,
+				success : function(arr) {
+					$("select[name=" + disname + "] option").remove();
+					$("select[name=" + disname + "]").append(function() {
+						return "<option value=''>" + toptext + "</option>"
+					});
+					$.each(arr, function(i, item) {
+						$("select[name=" + disname + "]").append(function() {
+							return "<option>" + item + "</option>";
+						});
+					});
+				}
+			});
+		}
+	function exchangeRate() {
+		$.ajax("/ajax/exchange1", {
+			success : function(data) {
+				console.log(data);
+				$("#exchange").html(data);
+			},
+			error : function(e) {
+				alert("환율 조회서버 오류 " + e.status);
+			}
+		});
+	}
+	function exchangeRate2() {
+		$.ajax("/ajax/exchange2", {
+			success : function(json) { // json형식
+				console.log(json);
+				let html = "<h4 class='w3-center'>수출입은행2<br>" + json.exdate + "</h4>";
+				html += "<table class='w3-table-all w3-margin-right'>"
+	+ "<tr><th>통화</th><th>기준율</th><th>받으실때</th><th>보내실때</th></tr>";
+				$.each(json.trlist, function(i, tds) {
+					html += "<tr><td>" + tds[0] + "<br>" + tds[1] + "</td><td>" + tds[4]
+					+ "</td><td>" + tds[2] + "</td><td>" + tds[3] + "</td></tr>"
+				})
+				html += "</table>";
+				$("#exchange").html(html)
+			}, error : function(e) {
+				alert("환율 조회시 서버 오류 : " +e.ststus);
+			}
+		})
+	}
+	let randomColorFactor = function() {
+		return Math.round(Math.random() * 255);
+	}
+	let randomColor = function(opa) {
+		return "rgba( " + randomColorFactor() + ","
+		 								+ randomColorFactor() + ","
+		 								+ randomColorFactor() + ","
+		 								+ (opa || ".3") + ")";
+	}
+	function piegraph(id) {
+		$.ajax("/ajax/graph1?id=" + id, {
+			success : function(json) {
+				let canvas = "<canvas id='canvas1' style='width:100%'></canvas>";
+				$("#pidcontainer").html(canvas);
+				setTimeout(function() {
+				  pieGraphPrint(json, id);
+				}, 0);
+			}, error : function(e) {
+				alert("서버오류 : " + e.status);
+			}
+		});
+	}
+	function pieGraphPrint(arr, id) {
+		let colors = [];
+		let writers = [];
+		let datas = [];
+		$.each(arr, function(index) {
+			colors[index] = randomColor(0.5);
+			for(key in arr[index]) {
+				writers.push(key);
+				datas.push(arr[index][key]);
+			}
+		});
+		let title = (id == 2)? " 자유게시판" : "QNA";
+		let config = {
+			type : "pie",
+			data : {
+				datasets : [{data : datas, backgroundColor : colors}],
+				labels : writers
+			}, options : {
+				responsive : true,
+				legend : {display : true, position : "right"},
+				title : {
+					display : true,
+					text : "글쓴이 별 " + title + " 등록 건수",
+					position : "bottom"
+				}
+			}
+		}
+		let ctx = document.getElementById("canvas1");
+		new Chart(ctx, config);
+	}
+</script>
 </body>
 </html>

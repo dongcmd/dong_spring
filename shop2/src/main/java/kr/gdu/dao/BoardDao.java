@@ -59,5 +59,8 @@ public class BoardDao {
 		param.put("grpstep", board.getGrpstep());
 		template.getMapper(cls).grpStepAdd(param);
 	}
+	public List<Map<String, Object>> graph1(String id) {
+		return template.getMapper(cls).graph1(id);
+	}
 	
 }

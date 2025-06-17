@@ -32,6 +32,7 @@
 		  $('#summernote').summernote({
 			  height : 300,
 			  callbacks : {
+					// onImageUpload : 이미지 업로드하는 이벤트
 					onImageUpload : function(images) {
 						for(let i = 0; i < images.length; i++) {
 							sendFile(images[i])
@@ -51,11 +52,10 @@
 			contentType : false,			// 컨텐트 타입 자동 설정 안함. 파일 업로드시 사용
 			success : function(src) { // 서버 응답 정상처리
 				$("#summernote").summernote("insertImage", src)
+				// <img src="/board/image/파일명" ... />
 			}, error : function(e) { // 서버 응답 오류
 				alert("이미지 업로드 실패 : " + e.status)
 			}
 		})
 	}
-</script>
-</body>
-</html>
+</script></body></html>
