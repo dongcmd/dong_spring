@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://thymeleaf.org"><head><meta charset="UTF-8">
+<html xmlns:th="http://thymeleaf.org" th:replace=
+ "~{/layout/layout :: layout(~{::title}, ~{::body}, ~{::style})}">
+<head><meta charset="UTF-8">
 <title>상품등록</title>
 </head>
 <body>
@@ -8,11 +10,11 @@
 <h2>상품등록</h2>
 <table>
 <tr><td>상품명</td>
-    <td><input name="name" th:filed="*{name}" /></td>
+    <td><input name="name" th:field="*{name}" /></td>
     <td th:if="${#fields.hasErrors('name')}" th:errors="*{name}"
     class="w3-text-red">name</td></tr>
 <tr><td>상품가격</td>
-    <td><input name="price" th:filed="*{price}" /></td>
+    <td><input name="price" th:field="*{price}" /></td>
     <td th:if="${#fields.hasErrors('price')}" th:errors="*{price}"
     class="w3-text-red">price</td></tr>
 <tr><td>상품이미지</td>

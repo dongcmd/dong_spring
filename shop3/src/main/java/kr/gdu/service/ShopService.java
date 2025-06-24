@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,19 +56,19 @@ public class ShopService {
 			e.printStackTrace();
 		}
 	}
-	/*
-	public void itemUpdate(Item item, HttpServletRequest request) {
+	public void itemUpdate(@Valid Item item, HttpServletRequest request) {
 		if(item.getPicture() != null && !item.getPicture().isEmpty()) {
 			String path = request.getServletContext().getRealPath("/")+"img/";
 			uploadFileCreate(item.getPicture(),path);
 			item.setPictureUrl(item.getPicture().getOriginalFilename());
 		}
-		itemDao.update(item);
+		itemDao.save(item);
 	}
 
 	public void itemDelete(Integer id) {
-		itemDao.delete(id);
+		itemDao.deleteById(id);
 	}
+	/*
 	public Sale checkend(User loginUser, Cart cart) { 	
 	    int maxsaleid = saleDao.getMaxSaleId(); //최종 주문번호 조회
 	    Sale sale = new Sale();
